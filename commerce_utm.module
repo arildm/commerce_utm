@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * Implements hook_boot().
+ */
+function commerce_utm_boot() {
+  if (!isset($_SESSION['drupal_commerce_utm_tags'])) {
+    // Save incoming UTM tags.
+    $tags = array();
+    foreach ($_GET as $name => $value) {
+      if (strpos($name, 'utm_') === 0) {
+        $tags[$name] = $value;
+      }
+    }
+    watchdog('commerce_utm', 'Saved: ' . var_export($tags, TRUE), array(), WATCHDOG_DEBUG);
+    $_SESSION['drupal_commerce_utm_tags'] = json_encode($tags);
+  }
+  else watchdog('commerce_utm', 'Had: ' . var_export($_SESSION['drupal_commerce_utm_tags'], TRUE), array(), WATCHDOG_DEBUG);
+}
+
+/**
+ * Implements hook_commerce_order_presave().
+ */
+function commerce_utm_commerce_order_presave($order) {
+  if ($utm_field_name = variable_get('commerce_utm_field', NULL)) {
+    if ($tags = $_SESSION['drupal_commerce_utm_tags']) {
+      $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+      $order_wrapper->{$utm_field_name} = $tags;
+    }
+  }
+}

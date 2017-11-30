@@ -1,0 +1,4 @@
+name = Commerce UTM
+description = Save UTM tags for incoming visitors to their Commerce Orders
+package = Commerce ()
+core = 7.x
