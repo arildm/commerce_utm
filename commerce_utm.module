@@ -23,7 +23,7 @@ function commerce_utm_boot() {
  */
 function commerce_utm_commerce_order_presave($order) {
   if ($utm_field_name = variable_get('commerce_utm_field', NULL)) {
-    if (isset($_SESSION[COMMERCE_UTM_TAGS])) {
+    if (!empty($_SESSION[COMMERCE_UTM_TAGS])) {
       $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
       if (!$order_wrapper->{$utm_field_name}->value()) {
         // Move tags from session into order field.
