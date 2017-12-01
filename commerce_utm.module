@@ -1,10 +1,12 @@
 <?php
 
+const COMMERCE_UTM_TAGS = 'drupal_commerce_utm_tags';
+
 /**
  * Implements hook_boot().
  */
 function commerce_utm_boot() {
-  if (!isset($_SESSION['drupal_commerce_utm_tags'])) {
+  if (!isset($_SESSION[COMMERCE_UTM_TAGS])) {
     // Save incoming UTM tags.
     $tags = array();
     foreach ($_GET as $name => $value) {
@@ -13,9 +15,9 @@ function commerce_utm_boot() {
       }
     }
     watchdog('commerce_utm', 'Saved: ' . var_export($tags, TRUE), array(), WATCHDOG_DEBUG);
-    $_SESSION['drupal_commerce_utm_tags'] = json_encode($tags);
+    $_SESSION[COMMERCE_UTM_TAGS] = json_encode($tags);
   }
-  else watchdog('commerce_utm', 'Had: ' . var_export($_SESSION['drupal_commerce_utm_tags'], TRUE), array(), WATCHDOG_DEBUG);
+  else watchdog('commerce_utm', 'Had: ' . var_export($_SESSION[COMMERCE_UTM_TAGS], TRUE), array(), WATCHDOG_DEBUG);
 }
 
 /**
@@ -23,9 +25,16 @@ function commerce_utm_boot() {
  */
 function commerce_utm_commerce_order_presave($order) {
   if ($utm_field_name = variable_get('commerce_utm_field', NULL)) {
-    if ($tags = $_SESSION['drupal_commerce_utm_tags']) {
+    if (isset($_SESSION[COMMERCE_UTM_TAGS])) {
       $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
-      $order_wrapper->{$utm_field_name} = $tags;
+      if (!$order_wrapper->{$utm_field_name}->value()) {
+        // Move tags from session into order field.
+        $order_wrapper->{$utm_field_name} = $_SESSION[COMMERCE_UTM_TAGS];
+        unset($_SESSION[COMMERCE_UTM_TAGS]);
+        watchdog('commerce_utm', 'Order: saved ' . var_export($order_wrapper->{$utm_field_name}->value(), TRUE), array(), WATCHDOG_DEBUG);
+      }
+      else watchdog('commerce_utm', 'Order: tags already set to ' . var_export($order_wrapper->{$utm_field_name}->value(), TRUE), array(), WATCHDOG_DEBUG);
     }
+    else watchdog('commerce_utm', 'Order: no tags in session', array(), WATCHDOG_DEBUG);
   }
 }
