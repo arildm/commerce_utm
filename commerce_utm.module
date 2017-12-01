@@ -14,10 +14,8 @@ function commerce_utm_boot() {
         $tags[$name] = $value;
       }
     }
-    watchdog('commerce_utm', 'Saved: ' . var_export($tags, TRUE), array(), WATCHDOG_DEBUG);
     $_SESSION[COMMERCE_UTM_TAGS] = json_encode($tags);
   }
-  else watchdog('commerce_utm', 'Had: ' . var_export($_SESSION[COMMERCE_UTM_TAGS], TRUE), array(), WATCHDOG_DEBUG);
 }
 
 /**
@@ -31,10 +29,7 @@ function commerce_utm_commerce_order_presave($order) {
         // Move tags from session into order field.
         $order_wrapper->{$utm_field_name} = $_SESSION[COMMERCE_UTM_TAGS];
         unset($_SESSION[COMMERCE_UTM_TAGS]);
-        watchdog('commerce_utm', 'Order: saved ' . var_export($order_wrapper->{$utm_field_name}->value(), TRUE), array(), WATCHDOG_DEBUG);
       }
-      else watchdog('commerce_utm', 'Order: tags already set to ' . var_export($order_wrapper->{$utm_field_name}->value(), TRUE), array(), WATCHDOG_DEBUG);
     }
-    else watchdog('commerce_utm', 'Order: no tags in session', array(), WATCHDOG_DEBUG);
   }
 }
