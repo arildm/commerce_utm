@@ -14,7 +14,9 @@ function commerce_utm_boot() {
         $tags[$name] = $value;
       }
     }
-    $_SESSION[COMMERCE_UTM_TAGS] = json_encode($tags);
+    if ($tags) {
+      $_SESSION[COMMERCE_UTM_TAGS] = json_encode($tags);
+    }
   }
 }
 
